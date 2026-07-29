@@ -1,0 +1,54 @@
+echo "処理しています..."
+mkdir ~/bin
+cd ~/bin
+
+paths=$(pwd)
+
+#!/bin/sh
+
+# OS判定
+OS=$(uname)
+
+if [ "$OS" = "Linux" ]; then
+echo 'export PATH="$PATH:$HOME/bin"' >> ~/.bashrc && source ~/.bashrc
+fi
+
+if [ "$OS" = "Darwin" ]; then
+echo 'export PATH="$PATH:$HOME/bin"' >> ~/.zshrc && source ~/.zshrc
+
+else
+
+echo "このOSがbashを使っているか判定できないため確実なPATHを登録できない可能性があります。"
+echo 'export PATH="$PATH:$HOME/bin"' >> ~/.bashrc && source ~/.bashrc
+echo "処理は続行されました。"
+fi
+
+msgbox() {
+    title="$1"
+    message="$2"
+    
+    if [ "$(uname)" = "Darwin" ]; then
+        # macOS: AppleScriptを使用して前面にダイアログを表示
+        osascript -e "tell application \"System Events\" to display dialog \"$message\" with title \"$title\" buttons {\"OK\"} default button \"OK\"" >/dev/null 2>&1
+    elif command -v zenity >/dev/null 2>&1; then
+        # Linux (GUI): Zenityが使える場合
+        zenity --info --title="$title" --text="$message" --width=300
+    elif command -v whiptail >/dev/null 2>&1; then
+        # Linux (CUI): ターミナル内でのメッセージボックス（Ubuntuなどに標準搭載）
+        whiptail --title "$title" --msgbox "$message" 10 50
+    elif command -v dialog >/dev/null 2>&1; then
+        # Linux (CUI): dialogコマンドが使える場合
+        dialog --title "$title" --msgbox "$message" 10 50
+    else
+        # 最終手段: どのコマンドもない場合はターミナルに出力
+        echo "=== $title ==="
+        echo "$message"
+        echo "=============="
+    fi
+}
+
+msgbox "処理" "処理は完了しました！"
+
+curl -o "${paths}/viewfetch" "https://release-assets.githubusercontent.com/github-production-release-asset/1315949530/f29a9fd4-5794-420a-83b4-61b459355a42?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-07-29T11%3A00%3A38Z&rscd=attachment%3B+filename%3Dviewfetch-builded&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-07-29T10%3A00%3A10Z&ske=2026-07-29T11%3A00%3A38Z&sks=b&skv=2018-11-09&sig=gveugwVCJD2dDRjAz%2Fn2XWfFPFbQSTkKRX%2BJcFgYIdk%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4NTMyMDQ2MywibmJmIjoxNzg1MzIwMTYzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.GrA2j8tpzbDpu7gpQzdxsPHQ5fR7hR5M112X9wWXGQ8&response-content-disposition=attachment%3B%20filename%3Dviewfetch-builded&response-content-type=application%2Foctet-stream"
+chmod +x ${paths}/viewfetch
+echo "テストとしてviewfetchを導入したので実行してみてください！パスは${paths}です。そこにファイルを追加すればフルパス不要でファイルを実行できます。"
